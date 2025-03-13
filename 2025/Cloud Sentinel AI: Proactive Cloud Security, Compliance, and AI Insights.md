@@ -1,6 +1,3 @@
-
-Here is a **detailed professional README** you can showcase on GitHub for this **Cloud Security Project** — covering manual deployment, Terraform automation, Prowler, and AI-driven security analysis.
-
 ---
 
 # 🔐 Secure AWS VPC Infrastructure with Cloud Security, Terraform, and AI-Driven Insights
