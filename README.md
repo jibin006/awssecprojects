@@ -1,2 +1,1 @@
-# awssecprojects
-showcasing aws security projects
+Showcasing aws security projects
