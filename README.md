@@ -1,1 +1,0 @@
-Showcasing aws security projects
