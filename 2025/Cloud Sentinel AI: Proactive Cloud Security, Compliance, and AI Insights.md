@@ -313,6 +313,7 @@ After resolving the dependency issues, we encountered a formatting issue with th
 - Solution: Modified how the output formats were specified by separating them with spaces instead of commas:
   ```bash
   python3 prowler-cli.py -M csv json-ocsf html -o prowler-report
+  python3 prowler-cli.py --region ap-south-1 -M csv json-ocsf html -o prowler-report
   ```
 
 ## Pydantic Schema Generation Error
