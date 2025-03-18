@@ -352,6 +352,8 @@ After getting past the initial dependency and command format issues, we encounte
 
 The main issues encountered were related to missing dependencies and the compatibility between Prowler's code and Pydantic versions. By systematically addressing each dependency issue and correcting the command format, we were able to successfully run Prowler for security assessments. The Pydantic version mismatch was the most significant challenge, requiring either a version downgrade or code modification to resolve.
 
+<img width="692" alt="image" src="https://github.com/user-attachments/assets/92146506-c9f9-46f3-8f40-8f996ce3d6be" />
+
 ### **Phase 3: AI-Driven Security Insights**
 
 - **Analyze Prowler output** with AI tool (custom script/ChatGPT/LLM API)
