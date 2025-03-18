@@ -96,9 +96,23 @@ User (Admin) ─── SSH ───> Bastion Host (Public Subnet)
 
 1. **Security Group Update**: Modified the security group to allow SSH access from your current IP address.
 
+Update the security group to allow your current IP:
+
+bash
+aws ec2 authorize-security-group-ingress \
+    --group-id sg-074d14580bded3ade \
+    --protocol tcp \
+    --port 22 \
+    --cidr $(curl -s https://checkip.amazonaws.com)/32
+This adds your current IP to the allowed list while keeping the existing rule.
+
 2. **Two-Step SSH Connection**: Established connection to the bastion host first, then from there to the private web server.
 
 3. **SSH Agent Forwarding**: Used SSH agent forwarding to authenticate to the private server without copying the private key to the bastion host.
+
+eval $(ssh-agent)
+ssh-add keypair.pem
+ssh -A ec2-user@13.201.119.178
 
 This approach followed the proper security pattern for accessing private resources in AWS, using a bastion host as the secure entry point and keeping sensitive credentials (SSH keys) protected.
 
