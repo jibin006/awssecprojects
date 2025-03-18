@@ -363,7 +363,147 @@ The main issues encountered were related to missing dependencies and the compati
   - Risk categorization: Critical, High, Medium, Low
 
 ---
+ ```json
 
+### Top 10 Security Risks Identified in Prowler Scan:
+
+1. **IAM Configuration Issues**  
+   - **Critical**: 0
+   - **High**: 14
+   - **Medium**: 12
+   - **Low**: 6  
+   **Risk**: Misconfigured IAM policies or roles can lead to excessive permissions, potentially allowing unauthorized access to sensitive resources. 
+
+2. **CloudWatch Configuration Issues**  
+   - **Critical**: 0  
+   - **High**: 0  
+   - **Medium**: 17  
+   - **Low**: 0  
+   **Risk**: Lack of proper monitoring and logging configuration may lead to undetected security events.
+
+3. **S3 Bucket Misconfiguration**  
+   - **Critical**: 0  
+   - **High**: 1  
+   - **Medium**: 22  
+   - **Low**: 12  
+   **Risk**: Misconfigured S3 buckets can expose sensitive data if the permissions are too permissive or incorrect.
+
+4. **EC2 Instance Misconfigurations**  
+   - **Critical**: 0  
+   - **High**: 1  
+   - **Medium**: 12  
+   - **Low**: 4  
+   **Risk**: EC2 instances may be running with outdated or insecure configurations, making them vulnerable to attacks.
+
+5. **CloudTrail Configuration Issues**  
+   - **Critical**: 0  
+   - **High**: 0  
+   - **Medium**: 3  
+   - **Low**: 1  
+   **Risk**: Insufficient logging and monitoring of AWS CloudTrail could lead to a failure to detect malicious activity.
+
+6. **IAM Policies Not Following Best Practices**  
+   - **Critical**: 0  
+   - **High**: 0  
+   - **Medium**: 1  
+   - **Low**: 0  
+   **Risk**: IAM policies not aligned with security best practices can lead to unauthorized access to AWS resources.
+
+7. **Network Firewall Misconfiguration**  
+   - **Critical**: 0  
+   - **High**: 0  
+   - **Medium**: 1  
+   - **Low**: 0  
+   **Risk**: Misconfigured network firewalls may allow unauthorized inbound or outbound traffic.
+
+8. **Backup Configuration Issues**  
+   - **Critical**: 0  
+   - **High**: 0  
+   - **Medium**: 0  
+   - **Low**: 1  
+   **Risk**: Inadequate backup configurations or missing backups may result in data loss in case of a breach.
+
+9. **GuardDuty Detection Misconfiguration**  
+   - **Critical**: 0  
+   - **High**: 0  
+   - **Medium**: 1  
+   - **Low**: 0  
+   **Risk**: Misconfigured GuardDuty detection might miss detecting potential threats to the environment.
+
+10. **VPC Misconfigurations**  
+    - **Critical**: 0  
+    - **High**: 0  
+    - **Medium**: 1  
+    - **Low**: 0  
+    **Risk**: Insecure VPC configurations can expose resources to the internet or malicious users.
+
+---
+
+### AI-Suggested Remediation Steps:
+
+1. **IAM Configuration Issues**:
+   - Regularly review and refine IAM roles and permissions based on the principle of least privilege.
+   - Implement identity federation where necessary to limit direct IAM account usage.
+   - Use IAM Access Analyzer to continuously audit permissions and roles.
+
+2. **CloudWatch Configuration Issues**:
+   - Ensure that CloudWatch is properly configured to capture and store logs for all resources.
+   - Set up CloudWatch Alarms to notify of suspicious activities or abnormal behavior.
+   - Enable CloudWatch Logs Insights to monitor logs in real-time for security events.
+
+3. **S3 Bucket Misconfiguration**:
+   - Ensure S3 buckets are private by default and that ACLs are not set to public.
+   - Enable S3 Bucket Logging to track access and modifications to the buckets.
+   - Implement AWS S3 Block Public Access settings across all buckets.
+
+4. **EC2 Instance Misconfigurations**:
+   - Ensure EC2 instances are configured with security groups and NACLs that restrict inbound and outbound traffic.
+   - Apply security patches and updates regularly.
+   - Use Amazon Inspector for automated vulnerability scanning of EC2 instances.
+
+5. **CloudTrail Configuration Issues**:
+   - Ensure that CloudTrail is enabled in all regions, and logs are delivered to a secure S3 bucket.
+   - Set up alerts for unauthorized API calls using CloudWatch Logs.
+   - Regularly monitor CloudTrail logs for any suspicious activity.
+
+6. **IAM Policies Not Following Best Practices**:
+   - Review IAM policies for overly permissive statements and implement stricter controls.
+   - Use AWS managed policies where possible to simplify access control.
+   - Use permissions boundary to limit the scope of permissions.
+
+7. **Network Firewall Misconfiguration**:
+   - Regularly audit security group and NACL configurations to ensure that only trusted IPs have access to critical resources.
+   - Use AWS WAF to protect web-facing resources from common threats.
+   - Enable VPC Flow Logs for network traffic monitoring.
+
+8. **Backup Configuration Issues**:
+   - Automate backups for critical data using AWS Backup.
+   - Regularly test backup restoration to ensure the integrity and reliability of backup systems.
+   - Set backup retention policies to avoid over-retention of outdated data.
+
+9. **GuardDuty Detection Misconfiguration**:
+   - Ensure GuardDuty is enabled in all regions and configured to send findings to CloudWatch for alerting.
+   - Regularly review GuardDuty findings and take appropriate remediation actions.
+   - Integrate GuardDuty with other security tools like AWS Security Hub for a consolidated view.
+
+10. **VPC Misconfigurations**:
+    - Use VPC flow logs to track network traffic and monitor for unusual behavior.
+    - Restrict VPC traffic using security groups, NACLs, and VPC Peering.
+    - Use AWS Transit Gateway for centralized network management and security.
+
+---
+
+### Risk Categorization:
+
+- **Critical**: None identified.
+- **High**: IAM (14), EC2 (1), GuardDuty (1)
+- **Medium**: CloudWatch (17), IAM (12), S3 (22), EC2 (12), CloudTrail (3), Bedrock (1), VPC (1)
+- **Low**: S3 (12), Backup (1), Config (1), Macie (1), Support (1), VPC (1), ResourceExplorer2 (1), SSM (1), Network-Firewall (1), VPC (1), Backup (1)
+
+---
+
+**Note**: These findings should be prioritized based on your organization's risk tolerance, sensitivity of resources, and compliance requirements. The AI-suggested remediation steps aim to address the most critical issues in a systematic manner to improve overall security posture.
+ ```
 ### **Phase 4: Terraform Automation**
 
 - Rebuild entire infrastructure using Terraform:
