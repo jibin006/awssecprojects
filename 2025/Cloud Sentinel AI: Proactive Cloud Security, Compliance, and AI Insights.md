@@ -79,6 +79,30 @@ User (Admin) ─── SSH ───> Bastion Host (Public Subnet)
 
 ---
 
+
+## Challenges Faced during phase 1:
+
+## SSH Connection Troubleshooting Summary
+
+1. **Bastion Host Connection Failure**: Initial SSH connection to the bastion host (13.201.119.178) failed with "Connection timed out" error.
+
+2. **Security Group Restriction**: Security group configuration was allowing SSH access only from a specific IP address (111.92.13.48/32), not from your CloudShell IP.
+
+3. **Private Server Access**: Attempted direct connection to private web server (10.0.3.34) from CloudShell, which is not possible as private IPs are not accessible from the internet.
+
+4. **Missing SSH Key**: When connecting from the bastion host to the private web server, the SSH key wasn't available on the bastion host.
+
+## Solutions Implemented
+
+1. **Security Group Update**: Modified the security group to allow SSH access from your current IP address.
+
+2. **Two-Step SSH Connection**: Established connection to the bastion host first, then from there to the private web server.
+
+3. **SSH Agent Forwarding**: Used SSH agent forwarding to authenticate to the private server without copying the private key to the bastion host.
+
+This approach followed the proper security pattern for accessing private resources in AWS, using a bastion host as the secure entry point and keeping sensitive credentials (SSH keys) protected.
+
+
 ### **Phase 2: Security Auditing with Prowler**
 
 - **Run Prowler** for:
