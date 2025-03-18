@@ -97,25 +97,166 @@ User (Admin) ─── SSH ───> Bastion Host (Public Subnet)
 1. **Security Group Update**: Modified the security group to allow SSH access from your current IP address.
 
 Update the security group to allow your current IP:
-
+```json
 aws ec2 authorize-security-group-ingress \
     --group-id sg-074d14580bded3ade \
     --protocol tcp \
     --port 22 \
     --cidr $(curl -s https://checkip.amazonaws.com)/32
-
+```
 This adds your current IP to the allowed list while keeping the existing rule.
 
 2. **Two-Step SSH Connection**: Established connection to the bastion host first, then from there to the private web server.
 
 3. **SSH Agent Forwarding**: Used SSH agent forwarding to authenticate to the private server without copying the private key to the bastion host.
-
+```json
 eval $(ssh-agent) 
 ssh-add keypair.pem 
 ssh -A ec2-user@13.201.119.178
 
-
+```
 This approach followed the proper security pattern for accessing private resources in AWS, using a bastion host as the secure entry point and keeping sensitive credentials (SSH keys) protected.
+
+---
+
+# **Challenges Faced in AWS Config Setup and Resolutions**
+
+## **Challenge 1: Configuration Recorder Creation Failed**  
+### **Issue:**  
+When attempting to set up AWS Config, the following error was encountered:  
+
+```
+Insufficient delivery policy to s3 bucket: cloudtrail-logs-jib, unable to write to bucket, provided s3 key prefix is 'null', provided kms key is 'null'.
+```
+
+This occurred because AWS Config did not have the necessary permissions to write logs to the specified **S3 bucket**.
+
+### **Resolution:**  
+Updated the **S3 bucket policy** to grant AWS Config the required permissions while keeping existing CloudTrail permissions intact.  
+
+#### **Updated S3 Bucket Policy:**
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AWSCloudTrailAclCheck",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudtrail.amazonaws.com"
+            },
+            "Action": "s3:GetBucketAcl",
+            "Resource": "arn:aws:s3:::cloudtrail-logs-jib",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "arn:aws:cloudtrail:ap-south-1:816069160759:trail/SecurityTrail"
+                }
+            }
+        },
+        {
+            "Sid": "AWSCloudTrailWrite",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudtrail.amazonaws.com"
+            },
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::cloudtrail-logs-jib/AWSLogs/816069160759/*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control",
+                    "AWS:SourceArn": "arn:aws:cloudtrail:ap-south-1:816069160759:trail/SecurityTrail"
+                }
+            }
+        },
+        {
+            "Sid": "AWSConfigBucketPermissionsCheck",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "config.amazonaws.com"
+            },
+            "Action": "s3:GetBucketAcl",
+            "Resource": "arn:aws:s3:::cloudtrail-logs-jib"
+        },
+        {
+            "Sid": "AWSConfigBucketDelivery",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "config.amazonaws.com"
+            },
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::cloudtrail-logs-jib/AWSLogs/816069160759/Config/*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control"
+                }
+            }
+        }
+    ]
+}
+```
+### **Outcome:**  
+- AWS Config now has **write access** to the S3 bucket, resolving the configuration recorder failure.  
+- The issue was fixed without impacting CloudTrail logging.  
+
+---
+
+## **Challenge 2: IAM Role for AWS Config Not Assigned**  
+### **Issue:**  
+When setting up AWS Config, an error was encountered:  
+
+```
+An unexpected error occurred and the role was not created (or updated). Try again or contact AWS support if the error persists.
+```
+
+This happened because AWS Config was unable to automatically create or assign the **service-linked IAM role** required for its operation.
+
+### **Resolution:**  
+#### **Step 1: Manually Create the IAM Role**
+1. Navigate to **AWS IAM Console → Roles**.  
+2. Click **Create Role** → Select **AWS Service** → Choose **Config**.  
+3. Click **Next** → Attach the following policies:
+   - **AWSConfigRole**
+   - **AmazonS3FullAccess** (temporary, only for testing)  
+4. Click **Next**, name the role **AWSServiceRoleForConfig**, and create it.  
+
+#### **Step 2: Update the Trust Relationship**
+1. Go to **IAM Console** → **Roles** → Search for `AWSServiceRoleForConfig`.  
+2. Click on **Trust relationships** → Click **Edit trust policy**.  
+3. Ensure the trust policy contains:  
+   ```json
+   {
+      "Version": "2012-10-17",
+      "Statement": [
+         {
+            "Effect": "Allow",
+            "Principal": {
+               "Service": "config.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+         }
+      ]
+   }
+   ```
+4. Click **Update trust policy**.  
+
+#### **Step 3: Retry AWS Config Setup**
+1. Go to **AWS Config Console**.  
+2. Click **Set up AWS Config**.  
+3. Select **Use an existing IAM role** → Choose **AWSServiceRoleForConfig**.  
+4. Proceed with the setup.  
+
+### **Outcome:**  
+- AWS Config is now able to assume the correct IAM role.  
+- The service successfully initializes without permission errors.  
+
+---
+
+## **Final Takeaways**
+- **Ensure AWS Config has the correct S3 bucket permissions** to avoid log delivery failures.  
+- **Manually create and assign the AWS Config IAM role** if automatic role creation fails.  
+- **Verify trust policies and permissions** when dealing with AWS service roles.  
+
+These steps successfully resolved both challenges, enabling AWS Config to function properly. ✅
 
 
 ### **Phase 2: Security Auditing with Prowler**
