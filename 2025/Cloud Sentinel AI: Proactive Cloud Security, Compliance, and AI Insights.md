@@ -269,6 +269,88 @@ These steps successfully resolved both challenges, enabling AWS Config to functi
 
 ---
 
+# Prowler Installation and Configuration Troubleshooting
+
+## Summary of Challenges and Solutions
+
+I encountered several challenges while setting up and running Prowler, a security assessment tool for AWS environments. This document outlines the issues faced and how they were resolved.
+
+## Dependency Issues
+
+### Missing Python Modules
+When attempting to run Prowler using the command `python3 prowler-cli.py -M csv,json,html -o prowler-report`, we encountered a series of missing dependency errors:
+
+1. **detect_secrets module**
+   - Error: `ModuleNotFoundError: No module named 'detect_secrets'`
+   - Solution: Installed the missing module using `pip3 install detect-secrets`
+
+2. **slack_sdk module**
+   - Error: `ModuleNotFoundError: No module named 'slack_sdk'`
+   - Solution: Installed the missing module using `pip3 install slack_sdk`
+
+3. **kubernetes client module**
+   - Error: `ImportError: cannot import name 'client' from 'kubernetes'`
+   - Solution: Reinstalled the kubernetes module using:
+     ```bash
+     pip3 uninstall -y kubernetes
+     pip3 install kubernetes
+     ```
+
+### Requirements File Not Found
+We attempted to install all dependencies at once using the requirements file:
+```bash
+pip3 install -r requirements.txt
+```
+
+However, this failed with the error: `ERROR: Could not open requirements file: [Errno 2] No such file or directory: 'requirements.txt'`
+
+## Command Format Issues
+
+After resolving the dependency issues, we encountered a formatting issue with the command:
+
+- Error: `prowler [-h] [--version] {aws,azure,gcp,kubernetes,microsoft365,dashboard} ... aws: error: argument --output-formats/--output-modes/-M: invalid choice: 'csv,json,html'`
+
+- Solution: Modified how the output formats were specified by separating them with spaces instead of commas:
+  ```bash
+  python3 prowler-cli.py -M csv json-ocsf html -o prowler-report
+  ```
+
+## Pydantic Schema Generation Error
+
+After getting past the initial dependency and command format issues, we encountered a Pydantic schema generation error with Prowler 5.5.0:
+
+### Possible Causes:
+1. **Pydantic Version Mismatch**: Prowler was using Pydantic v1 syntax, while our system had Pydantic v2 installed
+2. **Code Compatibility Issue**: The Prowler code wasn't allowing arbitrary types in Pydantic models
+3. **Environment Issues**: Dependencies may not have been correctly installed via Poetry
+
+### Solutions Implemented:
+1. **Downgraded Pydantic** to version 1:
+   ```bash
+   pip install "pydantic<2"
+   ```
+
+2. **Modified Prowler Code** (when applicable) to allow arbitrary types in `compliance_models.py`:
+   ```python
+   from pydantic import BaseModel, ConfigDict
+
+   class CIS_Requirement_Attribute_Profile(BaseModel):
+       model_config = ConfigDict(arbitrary_types_allowed=True)
+   ```
+
+3. **Used Poetry** for proper dependency management:
+   ```bash
+   poetry install
+   poetry run python3 prowler-cli.py -M csv json-ocsf html -o prowler-report
+   ```
+
+<img width="586" alt="image" src="https://github.com/user-attachments/assets/cb6b5a98-1a09-4635-a036-604fde1051f8" />
+
+
+## Conclusion
+
+The main issues encountered were related to missing dependencies and the compatibility between Prowler's code and Pydantic versions. By systematically addressing each dependency issue and correcting the command format, we were able to successfully run Prowler for security assessments. The Pydantic version mismatch was the most significant challenge, requiring either a version downgrade or code modification to resolve.
+
 ### **Phase 3: AI-Driven Security Insights**
 
 - **Analyze Prowler output** with AI tool (custom script/ChatGPT/LLM API)
