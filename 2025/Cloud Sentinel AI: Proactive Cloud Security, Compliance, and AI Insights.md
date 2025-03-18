@@ -119,9 +119,9 @@ This approach followed the proper security pattern for accessing private resourc
 
 ---
 
-# **Challenges Faced in AWS Config Setup and Resolutions**
+## Challenges Faced in AWS Config Setup and Resolutions
 
-## **Challenge 1: Configuration Recorder Creation Failed**  
+## Challenge 1: Configuration Recorder Creation Failed 
 ### **Issue:**  
 When attempting to set up AWS Config, the following error was encountered:  
 
@@ -200,7 +200,7 @@ Updated the **S3 bucket policy** to grant AWS Config the required permissions wh
 
 ---
 
-## **Challenge 2: IAM Role for AWS Config Not Assigned**  
+## Challenge 2: IAM Role for AWS Config Not Assigned  
 ### **Issue:**  
 When setting up AWS Config, an error was encountered:  
 
